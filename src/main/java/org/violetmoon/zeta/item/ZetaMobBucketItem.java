@@ -1,7 +1,6 @@
 package org.violetmoon.zeta.item;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 import org.violetmoon.zeta.module.ZetaModule;
@@ -21,7 +20,7 @@ public class ZetaMobBucketItem extends MobBucketItem implements IZetaItem {
 
 	private BooleanSupplier enabledSupplier = BooleanSuppliers.TRUE;
 
-	public ZetaMobBucketItem(Supplier<? extends EntityType<?>> entity, Supplier<? extends Fluid> fluid, Supplier<? extends SoundEvent> sound, String name, @Nullable ZetaModule module) {
+	public ZetaMobBucketItem(EntityType<?> entity, Fluid fluid, SoundEvent sound, String name, @Nullable ZetaModule module) {
 		super(entity, fluid, sound, (new Properties()).stacksTo(1));
 
 		this.module = module;
@@ -30,7 +29,7 @@ public class ZetaMobBucketItem extends MobBucketItem implements IZetaItem {
 			return;
 
 		module.zeta().registry.registerItem(this, name);
-		CreativeTabManager.addToCreativeTabNextTo(CreativeModeTabs.TOOLS_AND_UTILITIES, this, Items.AXOLOTL_BUCKET, false);
+		CreativeTabManager.addNextToItem(CreativeModeTabs.TOOLS_AND_UTILITIES, this, Items.AXOLOTL_BUCKET, false);
 	}
 
 	@Override

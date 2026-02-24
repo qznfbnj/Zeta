@@ -1,18 +1,17 @@
 package org.violetmoon.zeta.advancement;
 
-import org.jetbrains.annotations.NotNull;
+import com.mojang.serialization.Codec;
 
-import com.google.gson.JsonObject;
-
-import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-public class ManualTrigger extends SimpleCriterionTrigger<ManualTrigger.Instance> {
+import java.util.Optional;
 
+//todo: Check if this works
+public class ManualTrigger extends SimpleCriterionTrigger<ManualTrigger.Instance> {
 	final ResourceLocation id;
 
 	public ManualTrigger(ResourceLocation id) {
@@ -24,21 +23,15 @@ public class ManualTrigger extends SimpleCriterionTrigger<ManualTrigger.Instance
 	}
 
 	@Override
-	public ResourceLocation getId() {
-		return this.id;
+	public Codec<Instance> codec() {
+		return Instance.CODEC;
 	}
 
-	@Override
-	protected @NotNull Instance createInstance(@NotNull JsonObject jsonObject, @NotNull ContextAwarePredicate contextAwarePredicate, @NotNull DeserializationContext deserializationContext) {
-		return new Instance(id, contextAwarePredicate);
+	public record Instance(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
+        public static final Codec<ManualTrigger.Instance> CODEC = RecordCodecBuilder.create(
+            instanceInstance -> instanceInstance.group(
+                    ContextAwarePredicate.CODEC.optionalFieldOf("predicate").forGetter(Instance::player)
+            ).apply(instanceInstance, Instance::new)
+        );
 	}
-
-	public static class Instance extends AbstractCriterionTriggerInstance {
-
-		public Instance(ResourceLocation id, ContextAwarePredicate contextAwarePredicate) {
-			super(id, contextAwarePredicate);
-		}
-
-	}
-
 }

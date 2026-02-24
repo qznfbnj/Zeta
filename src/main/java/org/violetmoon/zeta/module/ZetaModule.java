@@ -1,32 +1,35 @@
 package org.violetmoon.zeta.module;
 
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.event.bus.LoadEvent;
 import org.violetmoon.zeta.event.load.ZGatherHints;
 
-import java.util.List;
-import java.util.Set;
-
 public class ZetaModule {
 
-    //all these deprecated are just so one knows that these will become protected soon
-    @Deprecated(forRemoval = true)
-    protected Zeta zeta;
-    protected ZetaCategory category;
+    //all these are just to notify that these will go package private soon. Should be read only! Cant make them final because module is initialized with reflections
+    Zeta zeta;
+    ZetaCategory category;
 
-    protected String displayName = "";
-    protected String lowercaseName = "";
-    protected String description = "";
+    //package protected
+    String displayName = "";
+    String lowercaseName = "";
+    String description = "";
 
-    protected Set<String> antiOverlap = Set.of();
+    //This gets dumped into a config comment; ordering must be consistent lest Forge complain the config file is "incorrect"
+    protected SortedSet<String> antiOverlap = new TreeSet<>();
 
-    //TODO: make these protected and provide accessors
-    protected boolean enabled = false;
-    protected boolean enabledByDefault = false;
-    protected boolean disabledByOverlap = false;
-    protected boolean ignoreAntiOverlap = false;
+    boolean enabled = false;
+    boolean enabledByDefault = false;
+    boolean disabledByOverlap = false;
+    boolean ignoreAntiOverlap = false;
 
+    //hack. Just needed so we can load this, then unload if need in configs and ONLY touch the bus when we know in which state we want to be
+    boolean finalized = false;
 
     public void postConstruct() {
         // NO-OP
@@ -46,18 +49,19 @@ public class ZetaModule {
         } else
             disabledByOverlap = false;
 
-        setEnabledAndManageSubscriptions(z, willEnable);
+        if (this.enabled == willEnable)
+            return;
+        this.enabled = willEnable;
+
+        if (finalized) updateBusSubscriptions(z);
     }
 
-    private void setEnabledAndManageSubscriptions(Zeta z, boolean nowEnabled) {
-        if (this.enabled == nowEnabled)
-            return;
-        this.enabled = nowEnabled;
-
-        if (nowEnabled)
+    void updateBusSubscriptions(Zeta z) {
+        if (enabled)
             z.playBus.subscribe(this.getClass()).subscribe(this);
-        else
+        else {
             z.playBus.unsubscribe(this.getClass()).unsubscribe(this);
+        }
     }
 
     //TODO: why is this here
@@ -73,17 +77,17 @@ public class ZetaModule {
         return zeta;
     }
 
-	public List<String> antiOverlap() {
-		return List.copyOf(antiOverlap);
-	}
+    public List<String> antiOverlap() {
+        return List.copyOf(antiOverlap);
+    }
 
-	public boolean disabledByOverlap() {
-		return disabledByOverlap;
-	}
+    public boolean disabledByOverlap() {
+        return disabledByOverlap;
+    }
 
-	public boolean ignoreAntiOverlap() {
-		return ignoreAntiOverlap;
-	}
+    public boolean ignoreAntiOverlap() {
+        return ignoreAntiOverlap;
+    }
 
     public ZetaCategory category() {
         return category;
@@ -105,9 +109,13 @@ public class ZetaModule {
         return enabled;
     }
 
-	public boolean enabledByDefault() {
-		return enabledByDefault;
-	}
+    public boolean enabledByDefault() {
+        return enabledByDefault;
+    }
+
+    public void setEnabledByDefault(boolean enabledByDefault) {
+        this.enabledByDefault = enabledByDefault;
+    }
 
     @ApiStatus.Internal
     public void setIgnoreAntiOverlap(boolean b) {

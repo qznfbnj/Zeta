@@ -10,62 +10,39 @@
  */
 package org.violetmoon.zeta.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.violetmoon.zeta.block.be.ZetaBlockEntity;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import org.jetbrains.annotations.NotNull;
+import org.violetmoon.zeta.block.be.ZetaBlockEntity;
 
 // formerly from AutoRegLib
 public abstract class SimpleInventoryBlockEntity extends ZetaBlockEntity implements WorldlyContainer {
+
+	protected NonNullList<ItemStack> inventorySlots = NonNullList.withSize(getContainerSize(), ItemStack.EMPTY);
+
 	public SimpleInventoryBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
 		super(tileEntityTypeIn, pos, state);
 	}
 
-	protected NonNullList<ItemStack> inventorySlots = NonNullList.withSize(getContainerSize(), ItemStack.EMPTY);
-
 	@Override
-	public void readSharedNBT(CompoundTag par1NBTTagCompound) {
-		if(!needsToSyncInventory())
-			return;
-
-		ListTag var2 = par1NBTTagCompound.getList("Items", 10);
-		clearContent();
-		for(int var3 = 0; var3 < var2.size(); ++var3) {
-			CompoundTag var4 = var2.getCompound(var3);
-			byte var5 = var4.getByte("Slot");
-			if(var5 >= 0 && var5 < inventorySlots.size())
-				inventorySlots.set(var5, ItemStack.of(var4));
-		}
+	public void readSharedNBT(CompoundTag tag, HolderLookup.Provider provider) {
+		if (!needsToSyncInventory()) return;
+		ContainerHelper.loadAllItems(tag, this.inventorySlots, provider);
 	}
 
 	@Override
-	public void writeSharedNBT(CompoundTag par1NBTTagCompound) {
-		if(!needsToSyncInventory())
-			return;
-
-		ListTag var2 = new ListTag();
-		for(int var3 = 0; var3 < inventorySlots.size(); ++var3) {
-			if(!inventorySlots.get(var3).isEmpty()) {
-				CompoundTag var4 = new CompoundTag();
-				var4.putByte("Slot", (byte) var3);
-				inventorySlots.get(var3).save(var4);
-				var2.add(var4);
-			}
-		}
-		par1NBTTagCompound.put("Items", var2);
+	public void writeSharedNBT(CompoundTag tag, HolderLookup.Provider provider) {
+		if (!needsToSyncInventory()) return;
+		ContainerHelper.saveAllItems(tag, this.inventorySlots, provider);
 	}
 
 	protected boolean needsToSyncInventory() {
@@ -137,14 +114,16 @@ public abstract class SimpleInventoryBlockEntity extends ZetaBlockEntity impleme
 		return getLevel().getBlockEntity(getBlockPos()) == this && entityplayer.distanceToSqr(worldPosition.getX() + 0.5D, worldPosition.getY() + 0.5D, worldPosition.getZ() + 0.5D) <= 64;
 	}
 
+	/* TODO: Need to use ICapabilityProvider in registration (?)
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> capability, Direction facing) {
 		if(capability == ForgeCapabilities.ITEM_HANDLER)
-			return (LazyOptional<T>) LazyOptional.of(() -> new SidedInvWrapper(this, facing));
+			return (LazyOptional<T>)) LazyOptional.of(() -> new SidedInvWrapper(this, facing));
 
 		return LazyOptional.empty();
 	}
+	 */
 
 	@Override
 	public boolean canPlaceItem(int i, @NotNull ItemStack itemstack) {
@@ -152,23 +131,17 @@ public abstract class SimpleInventoryBlockEntity extends ZetaBlockEntity impleme
 	}
 
 	@Override
-	public void startOpen(@NotNull Player player) {
-		// NO-OP
-	}
+	public abstract void startOpen(@NotNull Player player);
 
 	@Override
-	public void stopOpen(@NotNull Player player) {
-		// NO-OP
-	}
+	public abstract void stopOpen(@NotNull Player player);
 
 	@Override
 	public void clearContent() {
 		inventorySlots = NonNullList.withSize(getContainerSize(), ItemStack.EMPTY);
 	}
 
-	public void inventoryChanged(int i) {
-		// NO-OP
-	}
+	public abstract void inventoryChanged(int i);
 
 	public boolean isAutomationEnabled() {
 		return true;

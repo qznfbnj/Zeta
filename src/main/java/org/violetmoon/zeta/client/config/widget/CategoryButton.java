@@ -20,11 +20,11 @@ public class CategoryButton extends Button {
 	}
 
 	@Override
-	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+	public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 
 		if(!active)
-			setTooltip(Tooltip.create(Component.translatable("quark.gui.config.missingaddon")));
+			setTooltip(Tooltip.create(Component.translatable("zeta.gui.config.missingaddon")));
 
 		Minecraft mc = Minecraft.getInstance();
 		guiGraphics.renderFakeItem(icon, getX() + 5, getY() + 2);

@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.config.ZetaGeneralConfig;
-import org.violetmoon.zeta.network.ZetaModInternalNetwork;
 
 public class ZetaMod {
 
@@ -14,17 +13,15 @@ public class ZetaMod {
 	//zeta mod own zeta thing
 	public static Zeta ZETA;
 
-	public ZetaMod(Zeta zeta) {
-		ZETA = zeta;
+    public ZetaMod(Zeta zeta) {
+        ZETA = zeta;
+        start();
+    }
+	
+	public static void start() {
+        ZETA.start();
+        ZETA.loadModules(null, null, ZetaGeneralConfig.INSTANCE);
 
-		start();
+        //ZetaModInternalNetwork.init();
 	}
-
-	private void start() {
-		ZETA.start();
-		ZETA.loadModules(null, null, ZetaGeneralConfig.INSTANCE);
-
-		ZetaModInternalNetwork.init();
-	}
-
 }

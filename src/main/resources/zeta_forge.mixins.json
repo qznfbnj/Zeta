@@ -1,22 +1,20 @@
 {
   "minVersion": "0.8",
   "required": true,
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "refmap": "zeta.mixins.refmap.json",
   "package": "org.violetmoon.zetaimplforge.mixin.mixins",
   "plugin": "org.violetmoon.zeta.mixin.plugin.InterfaceDelegateMixinPlugin",
   "mixins": [
-    "IngredientMixin",
-    "WeatheringCopperMixin",
     "AccessorPotionBrewing",
-    "self.IZetaBlockMixin_FAKE",
-    "self.IZetaItemMixin_FAKE"
+    "WeatheringCopperMixin",
+    "self.IZetaBlockMixin",
+    "self.IZetaItemMixin"
   ],
   "client": [
     "client.AccessorBlockColors",
     "client.AccessorItemColors",
-    "client.GameRenderMixin",
-    "client.ItemMixin"
+    "client.GameRenderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

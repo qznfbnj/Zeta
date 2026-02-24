@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.advancement.modifier.ASeedyPlaceModifier;
 import org.violetmoon.zeta.advancement.modifier.AdventuringTimeModifier;
@@ -26,7 +29,6 @@ import org.violetmoon.zeta.event.load.ZGatherAdvancementModifiers;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -38,8 +40,6 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import org.violetmoon.zetaimplforge.api.ForgeZGatherAdvancementModifiers;
-import org.violetmoon.zetaimplforge.client.event.play.ForgeZEarlyRender;
 
 //TODO: make this zeta-independent
 public class AdvancementModifierRegistry {
@@ -55,7 +55,7 @@ public class AdvancementModifierRegistry {
 	public ManualTrigger registerManualTrigger(String resloc) {
 		ResourceLocation id = zeta.registry.newResourceLocation(resloc);
 		ManualTrigger trigger = new ManualTrigger(id);
-		CriteriaTriggers.register(trigger);
+		CriteriaTriggers.register(id.toString(), trigger);
 		return trigger;
 	}
 
@@ -67,8 +67,8 @@ public class AdvancementModifierRegistry {
 	@PlayEvent
 	public void addListeners(ZAddReloadListener event) {
 		if(!gatheredAddons) {
-			IAdvancementModifierDelegate delegateImpl = new DelegateImpl();
-			zeta.loadBus.fire(new ZGatherAdvancementModifiers() {
+			//IAdvancementModifierDelegate delegateImpl = new DelegateImpl();
+			/*zeta.loadBus.fire(new ZGatherAdvancementModifiers() {
 				@Override
 				public void register(IAdvancementModifier modifier) {
 					addModifier(modifier);
@@ -78,33 +78,33 @@ public class AdvancementModifierRegistry {
 				public IAdvancementModifierDelegate getDelegate() {
 					return delegateImpl;
 				}
-			}, ZGatherAdvancementModifiers.class);
+			}, ZGatherAdvancementModifiers.class);*/
 
 			gatheredAddons = true;
 		}
 
 		ServerAdvancementManager advancements = event.getServerResources().getAdvancements();
-		event.addListener((ResourceManagerReloadListener) mgr -> onAdvancementsLoaded(advancements));
+		event.addListener((ResourceManagerReloadListener) mgr -> onAdvancementsLoaded(advancements, event.getRegistryAccess()));
 
 	}
 
-	private void onAdvancementsLoaded(ServerAdvancementManager manager) {
+	private void onAdvancementsLoaded(ServerAdvancementManager manager, RegistryAccess registry) {
 		for(ResourceLocation res : modifiers.keySet()) {
-			Advancement adv = manager.getAdvancement(res);
+			AdvancementHolder advHolder = manager.get(res);
 
-			if(adv != null) {
+			if(advHolder != null) {
 				Collection<IAdvancementModifier> found = modifiers.get(res);
 
 				if(!found.isEmpty()) {
 					int modifications = 0;
-					MutableAdvancement mutable = new MutableAdvancement(adv);
+					MutableAdvancement mutable = new MutableAdvancement(advHolder.value());
 
 					for(IAdvancementModifier mod : found)
-						if(mod.isActive() && mod.apply(res, mutable))
+						if(mod.isActive() && mod.apply(res, mutable, registry))
 							modifications++;
 
 					if(modifications > 0) {
-						zeta.log.info("Modified advancement {} with {} patches", adv.getId(), modifications);
+						zeta.log.info("Modified advancement {} with {} patches", advHolder.id(), modifications);
 						mutable.commit();
 					}
 				}
@@ -112,7 +112,7 @@ public class AdvancementModifierRegistry {
 		}
 	}
 
-	private static class DelegateImpl implements IAdvancementModifierDelegate {
+	/*private static class DelegateImpl implements IAdvancementModifierDelegate {
 
 		@Override
 		public IAdvancementModifier createAdventuringTimeMod(Set<ResourceKey<Biome>> locations) {
@@ -125,7 +125,7 @@ public class AdvancementModifierRegistry {
 		}
 
 		@Override
-		public IAdvancementModifier createFuriousCocktailMod(BooleanSupplier isPotion, Set<MobEffect> effects) {
+		public IAdvancementModifier createFuriousCocktailMod(BooleanSupplier isPotion, Set<Holder<MobEffect>> effects) {
 			return new FuriousCocktailModifier(null, isPotion, effects);
 		}
 
@@ -164,6 +164,6 @@ public class AdvancementModifierRegistry {
 			return new GlowAndBeholdModifier(null, signs);
 		}
 
-	}
+	}*/
 
 }

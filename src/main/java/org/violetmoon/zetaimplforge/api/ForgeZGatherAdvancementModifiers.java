@@ -1,28 +1,30 @@
 package org.violetmoon.zetaimplforge.api;
 
-import net.minecraftforge.fml.event.IModBusEvent;
+import net.neoforged.bus.api.Event;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.api.IAdvancementModifier;
 import org.violetmoon.zeta.api.IAdvancementModifierDelegate;
 import org.violetmoon.zeta.event.load.ZGatherAdvancementModifiers;
 
-import net.minecraftforge.eventbus.api.Event;
+public class ForgeZGatherAdvancementModifiers extends Event implements ZGatherAdvancementModifiers {
+	private final ZGatherAdvancementModifiers inner;
 
-public class ForgeZGatherAdvancementModifiers extends Event implements ZGatherAdvancementModifiers, IModBusEvent {
-	private final ZGatherAdvancementModifiers wrapped;
+	public ForgeZGatherAdvancementModifiers(Zeta zeta, ZGatherAdvancementModifiers inner) {
+		this.inner = inner;
+	}
 
 	public ForgeZGatherAdvancementModifiers(ZGatherAdvancementModifiers inner) {
-		this.wrapped = inner;
+		this.inner = inner;
 	}
 
 	@Override
 	public void register(IAdvancementModifier modifier) {
-		wrapped.register(modifier);
+		inner.register(modifier);
 	}
 
 	@Override
 	public IAdvancementModifierDelegate getDelegate() {
-		return wrapped.getDelegate();
+		return inner.getDelegate();
 	}
 
 	//Note there are a ton of default methods available in ZGatherAdvancementModifiers for you to call.

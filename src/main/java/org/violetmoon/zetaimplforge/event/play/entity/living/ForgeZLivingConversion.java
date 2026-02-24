@@ -1,12 +1,11 @@
 package org.violetmoon.zetaimplforge.event.play.entity.living;
 
-import org.violetmoon.zeta.event.play.entity.living.ZLivingConversion;
-
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.entity.living.LivingConversionEvent;
+import net.neoforged.neoforge.event.entity.living.LivingConversionEvent;
+import org.violetmoon.zeta.event.play.entity.living.ZLivingConversion;
 
-public class ForgeZLivingConversion implements ZLivingConversion {
+public abstract class ForgeZLivingConversion implements ZLivingConversion {
     private final LivingConversionEvent e;
 
     public ForgeZLivingConversion(LivingConversionEvent e) {
@@ -16,16 +15,6 @@ public class ForgeZLivingConversion implements ZLivingConversion {
     @Override
     public LivingEntity getEntity() {
         return e.getEntity();
-    }
-
-    @Override
-    public boolean isCanceled() {
-        return e.isCanceled();
-    }
-
-    @Override
-    public void setCanceled(boolean cancel) {
-        e.setCanceled(cancel);
     }
 
     public static class Pre extends ForgeZLivingConversion implements ZLivingConversion.Pre {
@@ -40,6 +29,16 @@ public class ForgeZLivingConversion implements ZLivingConversion {
         public EntityType<? extends LivingEntity> getOutcome() {
             return e.getOutcome();
         }
+
+        @Override
+        public boolean isCanceled() {
+            return e.isCanceled();
+        }
+
+        @Override
+        public void setCanceled(boolean cancel) {
+            e.setCanceled(cancel);
+        }
     }
 
     public static class Post extends ForgeZLivingConversion implements ZLivingConversion.Post {
@@ -53,6 +52,16 @@ public class ForgeZLivingConversion implements ZLivingConversion {
         @Override
         public LivingEntity getOutcome() {
             return e.getOutcome();
+        }
+
+        @Override
+        public boolean isCanceled() {
+            return false;
+        }
+
+        @Override
+        public void setCanceled(boolean cancel) {
+            // NO-OP
         }
     }
 }

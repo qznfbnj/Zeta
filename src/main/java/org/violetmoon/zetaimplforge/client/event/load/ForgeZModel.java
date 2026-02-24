@@ -1,18 +1,17 @@
 package org.violetmoon.zetaimplforge.client.event.load;
 
-import java.util.Map;
-
-import org.violetmoon.zeta.client.event.load.ZModel;
-
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import org.violetmoon.zeta.client.event.load.ZModel;
+
+import java.util.Map;
 
 public class ForgeZModel implements ZModel {
-
     public static class ModifyBakingResult extends ForgeZModel implements ZModel.ModifyBakingResult {
         private final ModelEvent.ModifyBakingResult e;
 
@@ -21,7 +20,7 @@ public class ForgeZModel implements ZModel {
         }
 
         @Override
-        public Map<ResourceLocation, BakedModel> getModels() {
+        public Map<ModelResourceLocation, BakedModel> getModels() {
             return e.getModels();
         }
 
@@ -44,7 +43,7 @@ public class ForgeZModel implements ZModel {
         }
 
         @Override
-        public Map<ResourceLocation, BakedModel> getModels() {
+        public Map<ModelResourceLocation, BakedModel> getModels() {
             return e.getModels();
         }
 
@@ -62,7 +61,7 @@ public class ForgeZModel implements ZModel {
         }
 
         @Override
-        public void register(ResourceLocation model) {
+        public void register(ModelResourceLocation model) {
             e.register(model);
         }
     }
@@ -75,8 +74,8 @@ public class ForgeZModel implements ZModel {
         }
 
         @Override
-        public void register(String name, IGeometryLoader<?> loader) {
-            e.register(name, loader);
+        public void register(ResourceLocation id, IGeometryLoader<?> loader) {
+            e.register(id, loader);
         }
     }
 }

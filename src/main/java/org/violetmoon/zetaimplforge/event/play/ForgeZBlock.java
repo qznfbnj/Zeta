@@ -1,14 +1,13 @@
 package org.violetmoon.zetaimplforge.event.play;
 
-import org.jetbrains.annotations.Nullable;
-import org.violetmoon.zeta.event.play.ZBlock;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.event.level.BlockEvent;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import org.jetbrains.annotations.Nullable;
+import org.violetmoon.zeta.event.play.ZBlock;
 
 public class ForgeZBlock implements ZBlock {
     private final BlockEvent e;
@@ -69,8 +68,8 @@ public class ForgeZBlock implements ZBlock {
         }
 
         @Override
-        public ToolAction getToolAction() {
-            return e.getToolAction();
+        public ItemAbility getItemAbility() {
+            return e.getItemAbility();
         }
 
         @Override

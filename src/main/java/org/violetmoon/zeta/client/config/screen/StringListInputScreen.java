@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import net.minecraft.client.gui.components.Renderable;
 import org.jetbrains.annotations.NotNull;
 import org.violetmoon.zeta.client.ZetaClient;
 import org.violetmoon.zeta.client.config.widget.ScrollableWidgetList;
@@ -32,7 +33,6 @@ public class StringListInputScreen extends AbstractInputScreen<List<String>> {
 		super.init();
 
 		list = new ScrollableWidgetList<>(this);
-		addWidget(list);
 
 		forceUpdateWidgetsTo(get());
 	}
@@ -40,26 +40,36 @@ public class StringListInputScreen extends AbstractInputScreen<List<String>> {
 	@Override
 	protected void forceUpdateWidgetsTo(List<String> value) {
 		//out with the old
+		removeWidget(list);
 		list.removeChildWidgets(this::removeWidget);
 
 		//in with the new
-		list.replaceEntries(IntStream.range(0, value.size() + 1).mapToObj(Entry::new).toList());
-		list.addChildWidgets(this::addRenderableWidget, this::addWidget);
+		list.replaceEntries( IntStream.range(0, value.size() + 1).mapToObj(Entry::new).toList());
+
 
 		//re-clamp the scrollbar so when you remove an element, you aren't scrolled past the end
 		//setScrollAmount has a clamp() call in it
 		list.setScrollAmount(list.getScrollAmount());
 
+		list.addChildWidgets(this::addRenderableWidget, this::addWidget);
 		updateButtonStatus(def.validate(value));
+		addWidget(list);
 	}
 
 	@Override
 	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(guiGraphics);
+		//renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
-		list.render(guiGraphics, mouseX, mouseY, partialTicks);
-		super.render(guiGraphics, mouseX, mouseY, partialTicks);
-		list.reenableVisibleWidgets();
+        renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+
+        //super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        list.render(guiGraphics, mouseX, mouseY, partialTicks);
+
+        for(Renderable renderable : this.renderables) {
+            renderable.render(guiGraphics, mouseX, mouseY, partialTicks);
+        }
+
+        list.reenableVisibleWidgets();
 
 		guiGraphics.drawCenteredString(font, Component.literal(def.getTranslatedDisplayName(I18n::get)).withStyle(ChatFormatting.BOLD), width / 2, 20, 0xFFFFFF);
 	}
@@ -113,7 +123,7 @@ public class StringListInputScreen extends AbstractInputScreen<List<String>> {
 				EditBox field = new EditBox(mc.font, 10, 3, 210, 20, Component.literal(""));
 				field.setMaxLength(256);
 				field.setValue(here);
-				field.moveCursorTo(0);
+				field.moveCursorTo(0, false);
 				field.setResponder(str -> setString(index, str));
 				addScrollingWidget(field);
 

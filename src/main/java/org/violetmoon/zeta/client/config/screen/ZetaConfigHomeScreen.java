@@ -108,7 +108,7 @@ public class ZetaConfigHomeScreen extends ZetaScreen {
 	}
 
 	private Component componentForSaveButton() {
-		MutableComponent comp = Component.translatable("quark.gui.config.save");
+		MutableComponent comp = Component.translatable("zeta.gui.config.save");
 		int changeCount = changeSet.changeCount();
 		if(changeCount > 0)
 			comp.append(" (")
@@ -120,15 +120,15 @@ public class ZetaConfigHomeScreen extends ZetaScreen {
 
 	public void commit(Button button) {
 		changeSet.applyAllChanges();
-		returnToParent();
+		onClose();
 	}
 
 	@Override
 	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(guiGraphics);
+		renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
 
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
-		guiGraphics.drawCenteredString(font, ChatFormatting.BOLD + I18n.get("quark.gui.config.header", WordUtils.capitalizeFully(z.modid)), width / 2, 15, 0x48ddbc);
+		guiGraphics.drawCenteredString(font, ChatFormatting.BOLD + I18n.get("zeta.gui.config.header", WordUtils.capitalizeFully(z.modid)), width / 2, 15, 0x48ddbc);
 	}
 
 	@Override

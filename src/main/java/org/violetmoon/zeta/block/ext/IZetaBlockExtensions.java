@@ -1,36 +1,23 @@
 package org.violetmoon.zeta.block.ext;
 
-import java.util.Optional;
-
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoneycombItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.BeaconBeamBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.HalfTransparentBlock;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.WeatheringCopper;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.util.TriState;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * Imagine a mouse eating a suspiciously IForgeBlock-shaped piece of cheese
@@ -52,8 +39,8 @@ public interface IZetaBlockExtensions {
 		return state.getBlock() instanceof LadderBlock && state.getValue(LadderBlock.FACING) == trapdoorState.getValue(TrapDoorBlock.FACING);
 	}
 
-	default boolean canSustainPlantZeta(BlockState state, BlockGetter level, BlockPos pos, Direction facing, String plantabletype) {
-		return false;
+	default TriState canSustainPlantZeta(BlockState state, BlockGetter level, BlockPos soilPosition, Direction facing, BlockState plant) {
+		return TriState.DEFAULT;
 	}
 
 	default boolean isConduitFrameZeta(BlockState state, LevelReader level, BlockPos pos, BlockPos conduit) {
@@ -71,10 +58,8 @@ public interface IZetaBlockExtensions {
 		return state.getSoundType();
 	}
 
-	default float[] getBeaconColorMultiplierZeta(BlockState state, LevelReader level, BlockPos pos, BlockPos beaconPos) {
-		if(state.getBlock() instanceof BeaconBeamBlock bbeam)
-			return bbeam.getColor().getTextureDiffuseColors();
-		return null;
+	default Integer getBeaconColorMultiplierZeta(BlockState state, LevelReader level, BlockPos pos, BlockPos beaconPos) {
+		return state.getBlock() instanceof BeaconBeamBlock bbeam ? bbeam.getColor().getTextureDiffuseColor() : null;
 	}
 
 	default boolean isStickyBlockZeta(BlockState state) {
@@ -110,14 +95,13 @@ public interface IZetaBlockExtensions {
 	}
 
 	@Nullable
-	default BlockState getToolModifiedStateZeta(BlockState state, UseOnContext context, String toolActionType, boolean simulate) {
+	default BlockState getToolModifiedStateZeta(BlockState state, UseOnContext context, ItemAbility ability, boolean simulate) {
 		//TODO, check i copied forge correctly
 
 		//ItemStack itemStack = context.getItemInHand();
 		//if (!itemStack.canPerformAction(toolAction)) //Forge extension, TODO when i make an IZetaItemExtensions
 		//	return null;
-
-		return switch(toolActionType) {
+		return switch(ability.toString()) {
 			case "axe_strip" -> AxeItem.getAxeStrippingState(state); //TODO forge extension
 			case "axe_scrape" -> WeatheringCopper.getPrevious(state).orElse(null);
 			case "axe_wax_off" -> Optional.ofNullable(HoneycombItem.WAX_OFF_BY_BLOCK.get().get(state.getBlock())).map(block -> block.withPropertiesOf(state)).orElse(null);

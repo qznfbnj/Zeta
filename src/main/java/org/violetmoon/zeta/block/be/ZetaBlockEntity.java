@@ -11,6 +11,7 @@
 package org.violetmoon.zeta.block.be;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -26,24 +27,22 @@ public abstract class ZetaBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag nbt) {
-		super.saveAdditional(nbt);
-		
-		writeSharedNBT(nbt);
+	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.saveAdditional(tag, provider);
+		writeSharedNBT(tag, provider);
 	}
 
 	@Override
-	public void load(CompoundTag nbt) {
-		super.load(nbt);
-
-		readSharedNBT(nbt);
+	protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
+		super.loadAdditional(tag, provider);
+		readSharedNBT(tag, provider);
 	}
 
-	public void writeSharedNBT(CompoundTag cmp) {
+	public void writeSharedNBT(CompoundTag cmp, HolderLookup.Provider provider) {
 		// NO-OP
 	}
 
-	public void readSharedNBT(CompoundTag cmp) {
+	public void readSharedNBT(CompoundTag cmp, HolderLookup.Provider provider) {
 		// NO-OP
 	}
 	
@@ -54,18 +53,15 @@ public abstract class ZetaBlockEntity extends BlockEntity {
 	}
 	
 	@Override
-	public CompoundTag getUpdateTag() {
-		CompoundTag cmp = new CompoundTag();
-		writeSharedNBT(cmp);
-		return cmp;
-	}
-	
-	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-		super.onDataPacket(net, packet);
-		
-		if(packet != null)
-			readSharedNBT(packet.getTag());
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		CompoundTag tag = new CompoundTag();
+		writeSharedNBT(tag, provider);
+		return tag;
 	}
 
+	@Override
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider provider) {
+		super.onDataPacket(net, packet, provider);
+        //readSharedNBT(packet.getTag(), provider);
+	}
 }

@@ -69,7 +69,7 @@ public class ZetaSlabBlock extends SlabBlock implements IZetaBlock, IZetaBlockCo
 	}
 
 	@Override
-	public float[] getBeaconColorMultiplierZeta(BlockState state, LevelReader world, BlockPos pos, BlockPos beaconPos) {
+	public Integer getBeaconColorMultiplierZeta(BlockState state, LevelReader world, BlockPos pos, BlockPos beaconPos) {
 		BlockState parentState = parent.getBlock().defaultBlockState();
 		return parent.getModule().zeta().blockExtensions.get(parentState).getBeaconColorMultiplierZeta(parentState, world, pos, beaconPos);
 	}

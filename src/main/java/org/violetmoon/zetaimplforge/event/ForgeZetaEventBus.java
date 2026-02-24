@@ -2,16 +2,15 @@ package org.violetmoon.zetaimplforge.event;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.event.bus.*;
-import org.violetmoon.zeta.event.play.loading.ZGatherAdditionalFlags;
 import org.violetmoon.zetaimplforge.mod.ZetaModForge;
 
 import java.lang.annotation.Annotation;
@@ -47,14 +46,14 @@ public class ForgeZetaEventBus<Z, F extends Event> extends ZetaEventBus<Z> {
     public static ForgeZetaEventBus<IZetaLoadEvent, Event> ofLoadBus(@Nullable Logger logSpam, Zeta ofZeta) {
         return new ForgeZetaEventBus<>(
                 LoadEvent.class, IZetaLoadEvent.class,
-                logSpam, FMLJavaModLoadingContext.get().getModEventBus(), Event.class,
+                logSpam, ModLoadingContext.get().getActiveContainer().getEventBus(), Event.class,
                 ofZeta, DEFAULT_LOAD_EVENTS_REMAPPER);
     }
 
     public static ForgeZetaEventBus<IZetaPlayEvent, Event> ofPlayBus(@Nullable Logger logSpam, Zeta ofZeta) {
         return new ForgeZetaEventBus<>(
                 PlayEvent.class, IZetaPlayEvent.class,
-                logSpam, MinecraftForge.EVENT_BUS, Event.class,
+                logSpam, NeoForge.EVENT_BUS, Event.class,
                 ofZeta, DEFAULT_PLAY_EVENTS_REMAPPER);
     }
 
@@ -91,7 +90,9 @@ public class ForgeZetaEventBus<Z, F extends Event> extends ZetaEventBus<Z> {
     protected void unsubscribeMethod(Method m, Object receiver, Class<?> owningClazz) {
         var handler = convertedHandlers.remove(new Key(m, receiver, owningClazz));
         if (handler != null) {
-            forgeBus.unregister(handler);
+            synchronized (forgeBus) {
+                forgeBus.unregister(handler);
+            }
         }
     }
 

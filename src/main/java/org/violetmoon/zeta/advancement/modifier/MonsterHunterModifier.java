@@ -2,6 +2,7 @@ package org.violetmoon.zeta.advancement.modifier;
 
 import java.util.Set;
 
+import net.minecraft.core.RegistryAccess;
 import org.violetmoon.zeta.advancement.AdvancementModifier;
 import org.violetmoon.zeta.api.IMutableAdvancement;
 import org.violetmoon.zeta.module.ZetaModule;
@@ -18,14 +19,13 @@ import net.minecraft.world.entity.EntityType;
 
 public class MonsterHunterModifier extends AdvancementModifier {
 
-	private static final ResourceLocation TARGET_ONE = new ResourceLocation("adventure/kill_a_mob");
-	private static final ResourceLocation TARGET_ALL = new ResourceLocation("adventure/kill_all_mobs");
+	private static final ResourceLocation TARGET_ONE = ResourceLocation.withDefaultNamespace("adventure/kill_a_mob");
+	private static final ResourceLocation TARGET_ALL = ResourceLocation.withDefaultNamespace("adventure/kill_all_mobs");
 	
 	final Set<EntityType<?>> entityTypes;
 	
 	public MonsterHunterModifier(ZetaModule module, Set<EntityType<?>> entityTypes) {
 		super(module);
-		
 		this.entityTypes = entityTypes;
 	}
 
@@ -35,19 +35,17 @@ public class MonsterHunterModifier extends AdvancementModifier {
 	}
 
 	@Override
-	public boolean apply(ResourceLocation res, IMutableAdvancement adv) {
-		boolean all = res.equals(TARGET_ALL);
-		
+	public boolean apply(ResourceLocation res, IMutableAdvancement adv, RegistryAccess registry) {
 		for(EntityType<?> type : entityTypes) {
-			Criterion criterion = new Criterion(KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(type))));
-			
+			Criterion<KilledTrigger.TriggerInstance> criterion = KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(type)));
 			String name = BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
-			if(all)
+
+			if (res.equals(TARGET_ALL)) {
 				adv.addRequiredCriterion(name, criterion);
-			else adv.addOrCriterion(name, criterion);
+			} else {
+				adv.addOrCriterion(name, criterion);
+			}
 		}
-		
 		return true;
 	}
-
 }

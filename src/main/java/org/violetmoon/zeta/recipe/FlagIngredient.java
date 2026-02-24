@@ -1,67 +1,39 @@
 package org.violetmoon.zeta.recipe;
 
-import java.util.stream.Stream;
-
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import org.jetbrains.annotations.Nullable;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.config.ConfigFlagManager;
 
-import com.google.gson.JsonObject;
-
-import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntLists;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * @author WireSegal
  * Created at 3:44 PM on 10/20/19.
  */
-public class FlagIngredient extends Ingredient implements IZetaIngredient<FlagIngredient> {
+public class FlagIngredient implements IZetaCustomIngredient { // TODO: Abstract later, use NF-provided CustomIngredient for now
 
 	private final Ingredient parent;
-
 	private final ConfigFlagManager cfm;
 	private final String flag;
-	private final IZetaIngredientSerializer<FlagIngredient> serializer;
 
-	public FlagIngredient(Ingredient parent, String flag, ConfigFlagManager cfm, IZetaIngredientSerializer<FlagIngredient> serializer) {
-		super(Stream.of());
+	public FlagIngredient(Ingredient parent, String flag, ConfigFlagManager cfm) {
 		this.parent = parent;
 		this.cfm = cfm;
 		this.flag = flag;
-		this.serializer = serializer;
 	}
 
 	@Override
-	@NotNull
-	public ItemStack[] getItems() {
-		if (!cfm.getFlag(flag))
-			return new ItemStack[0];
-		return parent.getItems();
-	}
-
-	@Override
-	@NotNull
-	public IntList getStackingIds() {
-		if (!cfm.getFlag(flag))
-			return IntLists.EMPTY_LIST;
-		return parent.getStackingIds();
+	public Stream<ItemStack> getItems() {
+		return (!cfm.getFlag(flag)) ? Stream.empty() : Arrays.stream(parent.getItems());
 	}
 
 	@Override
 	public boolean test(@Nullable ItemStack target) {
-		if (target == null || !cfm.getFlag(flag))
-			return false;
-
-		return parent.test(target);
-	}
-
-	@Override
-	protected void invalidate() {
-		// The invalidate method will collect our parent as well
+		return cfm.getFlag(flag) && parent.test(target);
 	}
 
 	@Override
@@ -70,19 +42,47 @@ public class FlagIngredient extends Ingredient implements IZetaIngredient<FlagIn
 	}
 
 	@Override
-	public IZetaIngredientSerializer<FlagIngredient> zetaGetSerializer() {
-		return serializer;
+	public IngredientType<?> getType() {
+		return null;
 	}
 
-	public record Serializer(ConfigFlagManager cfm) implements IZetaIngredientSerializer<FlagIngredient> {
+	@Override
+	public Zeta getZeta() {
+		return cfm.zeta;
+	}
 
-		@Deprecated(forRemoval = true)
-		public static Serializer INSTANCE;
+	/*
+	public record Serializer(ConfigFlagManager cfm) implements IZetaCustomIngredient {
+
+		@Override
+		public boolean test(ItemStack stack) {
+			return false;
+		}
+
+		@Override
+		public Stream<ItemStack> getItems() {
+			return Stream.empty();
+		}
+
+		@Override
+		public boolean isSimple() {
+			return false;
+		}
+
+		@Override
+		public IngredientType<?> getType() {
+			return null;
+		}
+
+		@Override
+		public Zeta getZeta() {
+			return cfm.zeta;
+		}
 
 		@NotNull
 		@Override
 		public FlagIngredient parse(@NotNull FriendlyByteBuf buffer) {
-			return new FlagIngredient(Ingredient.fromNetwork(buffer), buffer.readUtf(), cfm, this);
+			return new FlagIngredient(Ingredient.CONTENTS_STREAM_CODEC.decode(buffer), buffer.readUtf(), cfm, this);
 		}
 
 		@NotNull
@@ -98,10 +98,5 @@ public class FlagIngredient extends Ingredient implements IZetaIngredient<FlagIn
 			ingredient.parent.toNetwork(buffer);
 			buffer.writeUtf(ingredient.flag);
 		}
-
-		@Override
-		public Zeta getZeta() {
-			return cfm.zeta;
-		}
-	}
+		*/
 }

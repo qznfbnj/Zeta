@@ -22,7 +22,7 @@ public class ZetaTrapdoorBlock extends TrapDoorBlock implements IZetaBlock {
 	private BooleanSupplier enabledSupplier = BooleanSuppliers.TRUE;
 
 	public ZetaTrapdoorBlock(BlockSetType setType, String regname, ZetaModule module, Properties properties) {
-		super(properties, setType);
+		super(setType, properties);
 		this.module = module;
 
 		if(module == null) //auto registration below this line
@@ -30,8 +30,8 @@ public class ZetaTrapdoorBlock extends TrapDoorBlock implements IZetaBlock {
 
 		module.zeta().renderLayerRegistry.put(this, RenderLayerRegistry.Layer.CUTOUT);
 		module.zeta().registry.registerBlock(this, regname, true);
-		CreativeTabManager.addToCreativeTab(CreativeModeTabs.BUILDING_BLOCKS, this);
-		CreativeTabManager.addToCreativeTab(CreativeModeTabs.REDSTONE_BLOCKS, this);
+		CreativeTabManager.addToTab(CreativeModeTabs.BUILDING_BLOCKS, this);
+		CreativeTabManager.addToTab(CreativeModeTabs.REDSTONE_BLOCKS, this);
 	}
 
 	@Override

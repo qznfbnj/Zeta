@@ -1,11 +1,8 @@
 package org.violetmoon.zetaimplforge.event.play.entity;
 
-import org.violetmoon.zeta.event.bus.ZResult;
-import org.violetmoon.zeta.event.play.entity.ZEntityMobGriefing;
-import org.violetmoon.zetaimplforge.ForgeZeta;
-
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.event.entity.EntityMobGriefingEvent;
+import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
+import org.violetmoon.zeta.event.play.entity.ZEntityMobGriefing;
 
 public class ForgeZEntityMobGriefing implements ZEntityMobGriefing {
     private final EntityMobGriefingEvent e;
@@ -20,12 +17,12 @@ public class ForgeZEntityMobGriefing implements ZEntityMobGriefing {
     }
 
     @Override
-    public ZResult getResult() {
-        return ForgeZeta.from(e.getResult());
+    public void setCanGrief(boolean canGrief) {
+        e.setCanGrief(canGrief);
     }
 
     @Override
-    public void setResult(ZResult value) {
-        e.setResult(ForgeZeta.to(value));
+    public boolean canGrief() {
+        return e.canGrief();
     }
 }

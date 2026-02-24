@@ -1,23 +1,13 @@
 package org.violetmoon.zeta.config;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.stream.Collectors;
-
-import org.violetmoon.zeta.event.bus.LoadEvent;
-import org.violetmoon.zeta.event.load.ZConfigChanged;
-import org.violetmoon.zeta.mod.ZetaMod;
-import org.violetmoon.zeta.network.message.S2CUpdateFlag;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketListener;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SyncedFlagHandler {
 	private static ConfigFlagManager flagManager;
@@ -66,11 +56,6 @@ public class SyncedFlagHandler {
 	@OnlyIn(Dist.CLIENT)
 	public static void receiveFlagInfoFromServer(BitSet bitSet) {
 		flagsFromServer.put(Minecraft.getInstance().getConnection(), decodeFlags(bitSet));
-	}
-	
-	@LoadEvent
-	public static void sendFlagInfoToPlayers(ZConfigChanged event) {
-		ZetaMod.ZETA.network.sendToPlayers(S2CUpdateFlag.createPacket(), flagsFromPlayers.keySet());
 	}
 
 	private static final WeakHashMap<PacketListener, Set<String>> flagsFromServer = new WeakHashMap<>();

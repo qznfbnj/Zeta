@@ -1,14 +1,13 @@
 package org.violetmoon.zetaimplforge.client.event.play;
 
+import net.neoforged.neoforge.client.event.InputEvent;
 import org.violetmoon.zeta.client.event.play.ZInput;
-
-import net.minecraftforge.client.event.InputEvent;
 
 public class ForgeZInput implements ZInput {
 	public static class MouseButton extends ForgeZInput implements ZInput.MouseButton {
-		private final InputEvent.MouseButton e;
+		private final InputEvent.MouseButton.Post e;
 
-		public MouseButton(InputEvent.MouseButton e) {
+		public MouseButton(InputEvent.MouseButton.Post e) {
 			this.e = e;
 		}
 

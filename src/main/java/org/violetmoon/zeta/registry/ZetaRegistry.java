@@ -1,27 +1,10 @@
 package org.violetmoon.zeta.registry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import org.checkerframework.checker.units.qual.A;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
-import org.violetmoon.zeta.Zeta;
-import org.violetmoon.zeta.item.ZetaBlockItem;
-import org.violetmoon.zeta.util.RegisterDynamicUtil;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.serialization.Lifecycle;
-
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
@@ -31,19 +14,29 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+import org.violetmoon.zeta.Zeta;
+import org.violetmoon.zeta.item.ZetaBlockItem;
+import org.violetmoon.zeta.util.RegisterDynamicUtil;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 //Mash of arl's RegistryHelper and its ModData innerclass.
 //You're expected to create one of these per modid instead, avoiding a dependency on Forge's "current mod id" notion.
 public abstract class ZetaRegistry {
-	protected final Zeta z;
+	public final Zeta z;
 
 	// the keys of this are things like "minecraft:block", "minecraft:item" and so on
 	private final Multimap<ResourceLocation, Supplier<Object>> defers = ArrayListMultimap.create();
 	// my registered entries
 	private final Map<ResourceKey<Registry<?>>, List<Holder<?>>> myRegisteredObjects = new HashMap<>();
-	
+
 	// to support calling getRegistryName before the object actually gets registered for real
-	protected final Map<Object, ResourceLocation> internalNames = new IdentityHashMap<>();
+	public final Map<Object, ResourceLocation> internalNames = new IdentityHashMap<>();
 	
 	// "named color provider" system allows blocks and items to choose their own color providers in a side-safe way
 	// TODO: should this go somewhere else and not be so tightly-integrated? (yes - i think a Registrate-like system would be a great spot for this)
@@ -63,11 +56,11 @@ public abstract class ZetaRegistry {
 		return internal == null ? registry.getKey(obj) : internal;
 	}
 
-	//You know how `new ResourceLocation(String)` prepends "minecraft" if there's no prefix?
+	//You know how `ResourceLocation.parse(String)` prepends "minecraft" if there's no prefix?
 	//This method is like that, except it prepends *your* modid
 	public ResourceLocation newResourceLocation(String in) {
-		if(in.indexOf(':') == -1) return new ResourceLocation(z.modid, in);
-		else return new ResourceLocation(in);
+		if(in.indexOf(':') == -1) return ResourceLocation.fromNamespaceAndPath(z.modid, in);
+		else return ResourceLocation.parse(in);
 	}
 
 	//Root registration method
@@ -270,7 +263,7 @@ public abstract class ZetaRegistry {
 		List<DynamicEntry<T>> typePun = ((List<DynamicEntry<T>>) (Object) entries);
 		typePun.forEach(entry -> {
 			T thing = entry.creator.apply(lookup);
-			writable.register(entry.id, thing, Lifecycle.stable());
+			writable.register(entry.id, thing, new RegistrationInfo(Optional.empty(), Lifecycle.stable())); //todo: Should this be Optional.empty()?
 
 			if(entry.lateBound != null)
 				entry.lateBound.bind(thing, writable);
@@ -285,6 +278,6 @@ public abstract class ZetaRegistry {
 	 * Gets all the registered objects from this Zeta
 	 */
 	public <O> Collection<Holder<O>> getRegisteredObjects(ResourceKey<Registry<O>> registry) {
-		return (Collection<Holder<O>>) (Collection) myRegisteredObjects.get((ResourceKey) registry);
+		return (Collection<Holder<O>>) (Collection) myRegisteredObjects.getOrDefault((ResourceKey) registry, List.of());
 	}
 }

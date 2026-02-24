@@ -1,24 +1,22 @@
 package org.violetmoon.zeta.advancement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.violetmoon.zeta.api.IMutableAdvancement;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.Criterion;
+import org.violetmoon.zeta.api.IMutableAdvancement;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MutableAdvancement implements IMutableAdvancement {
 	
-	final Advancement advancement;
+	Advancement advancement;
 	
-	public Map<String, Criterion> criteria;
+	public Map<String, Criterion<?>> criteria;
 	public List<List<String>> requirements;
 	
 	public MutableAdvancement(Advancement advancement) {
@@ -27,44 +25,48 @@ public class MutableAdvancement implements IMutableAdvancement {
 	}
 
 	@Override
-	public void addRequiredCriterion(String name, Criterion criterion) {
+	public void addRequiredCriterion(String name, Criterion<?> criterion) {
 		criteria.put(name, criterion);
 		requirements.add(Lists.newArrayList(name));
 	}
 
 	@Override
-	public void addOrCriterion(String name, Criterion criterion) {
+	public void addOrCriterion(String name, Criterion<?> criterion) {
 		criteria.put(name, criterion);
-		requirements.get(0).add(name);	
+		requirements.getFirst().add(name);
 	}
 
 	@Override
-	public Criterion getCriterion(String title) {
+	public void removeCriterion(String name) {
+		criteria.remove(name);
+	}
+
+	@Override
+	public void replaceCriterion(String name, Criterion<?> criterion) {
+		criteria.replace(name, criterion);
+	}
+
+	@Override
+	public Criterion<?> getCriterion(String title) {
 		return criteria.get(title);
 	}
 
 	private void mutabilize() {
-		this.criteria = Maps.newHashMap(advancement.criteria);
+		this.criteria = Maps.newHashMap(advancement.criteria());
 		this.requirements = new ArrayList<>();
-
-		String[][] arr = advancement.requirements;
-		for(String[] req : arr) {
-			List<String> reqList = new ArrayList<>(Arrays.asList(req));
-			this.requirements.add(reqList);
+		AdvancementRequirements advReq = advancement.requirements();
+		for (List<String> requirement : advReq.requirements()) {
+			List<String> replcRequirement = new ArrayList<>();
+			replcRequirement.addAll(requirement);
+			this.requirements.add(replcRequirement);
 		}
+        //this.requirements.addAll(advReq.requirements());
 	}
 	
 	public void commit() {
-		advancement.criteria = ImmutableMap.copyOf(criteria);
-		
-		List<String[]> requirementArrays = new ArrayList<>();
-		for(List<String> list : requirements) {
-			String[] arr = list.toArray(new String[list.size()]);
-			requirementArrays.add(arr);
-		}
-
-		String[][] arr = requirementArrays.toArray(new String[0][requirementArrays.size()]);
-		advancement.requirements = arr;
+		advancement = new Advancement(advancement.parent(), advancement.display(), advancement.rewards(), ImmutableMap.copyOf(criteria), new AdvancementRequirements(requirements), advancement.sendsTelemetryEvent(), advancement.name());
+		//advancement.criteria().clear();
+		//advancement.criteria().putAll(ImmutableMap.copyOf(criteria));
+		//advancement.requirements().requirements().addAll(requirements);
 	}
-	
 }

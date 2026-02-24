@@ -1,11 +1,13 @@
 package org.violetmoon.zetaimplforge.event.load;
 
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.event.IModBusEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.fml.event.IModBusEvent;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.advancement.AdvancementModifierRegistry;
 import org.violetmoon.zeta.event.load.ZRegister;
-import org.violetmoon.zeta.registry.*;
+import org.violetmoon.zeta.registry.RenderLayerRegistry;
+import org.violetmoon.zeta.registry.VariantRegistry;
+import org.violetmoon.zeta.registry.ZetaRegistry;
 
 public class ForgeZRegister extends Event implements ZRegister, IModBusEvent {
 
@@ -20,15 +22,10 @@ public class ForgeZRegister extends Event implements ZRegister, IModBusEvent {
         return zeta.registry;
     }
 
-    @Override
-    public CraftingExtensionsRegistry getCraftingExtensionsRegistry() {
+    //@Override
+    /*public CraftingExtensionsRegistry getCraftingExtensionsRegistry() {
         return zeta.craftingExtensions;
-    }
-
-    @Override
-    public BrewingRegistry getBrewingRegistry() {
-        return zeta.brewingRegistry;
-    }
+    }*/
 
     @Override
     public RenderLayerRegistry getRenderLayerRegistry() {

@@ -1,9 +1,8 @@
 package org.violetmoon.zetaimplforge.event.play.entity.living;
 
-import org.violetmoon.zeta.event.play.entity.living.ZLivingChangeTarget;
-
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import org.violetmoon.zeta.event.play.entity.living.ZLivingChangeTarget;
 
 public record ForgeZLivingChangeTarget(LivingChangeTargetEvent e) implements ZLivingChangeTarget {
 
@@ -14,7 +13,7 @@ public record ForgeZLivingChangeTarget(LivingChangeTargetEvent e) implements ZLi
 
     @Override
     public LivingEntity getNewTarget() {
-        return e.getNewTarget();
+        return e.getNewAboutToBeSetTarget();
     }
 
     @Override

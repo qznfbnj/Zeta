@@ -1,24 +1,23 @@
 package org.violetmoon.zeta.advancement.modifier;
 
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.critereon.LocationPredicate;
+import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 import org.violetmoon.zeta.advancement.AdvancementModifier;
 import org.violetmoon.zeta.api.IMutableAdvancement;
 import org.violetmoon.zeta.module.ZetaModule;
 
-import com.google.common.collect.ImmutableSet;
-
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.LocationPredicate;
-import net.minecraft.advancements.critereon.PlayerTrigger;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.Biome;
+import java.util.Set;
 
 public class AdventuringTimeModifier extends AdvancementModifier {
 
-	private static final ResourceLocation TARGET = new ResourceLocation("adventure/adventuring_time");
-	
+	private static final ResourceLocation TARGET = ResourceLocation.withDefaultNamespace("adventure/adventuring_time");
 	private final Set<ResourceKey<Biome>> locations;
 	
 	public AdventuringTimeModifier(ZetaModule module, Set<ResourceKey<Biome>> locations) {
@@ -32,15 +31,12 @@ public class AdventuringTimeModifier extends AdvancementModifier {
 	}
 
 	@Override
-	public boolean apply(ResourceLocation res, IMutableAdvancement adv) {
+	public boolean apply(ResourceLocation res, IMutableAdvancement adv, RegistryAccess registry) {
 		for(ResourceKey<Biome> key : locations) {
 			String name = key.location().toString();
-			
-			Criterion criterion = new Criterion(PlayerTrigger.TriggerInstance.located(
-					LocationPredicate.inBiome(key)));
+			Criterion<?> criterion = PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inBiome(registry.lookupOrThrow(Registries.BIOME).getOrThrow(key)));
 			adv.addRequiredCriterion(name, criterion);
 		}
-		
 		return true;
 	}
 

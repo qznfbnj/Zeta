@@ -1,13 +1,11 @@
 package org.violetmoon.zetaimplforge.client.event.play;
 
-import org.violetmoon.zeta.client.event.play.ZRenderPlayer;
-
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import org.violetmoon.zeta.client.event.play.ZRenderPlayer;
 import org.violetmoon.zeta.event.bus.IZetaPlayEvent;
 
 public abstract class ForgeZRenderPlayer implements ZRenderPlayer {
@@ -36,7 +34,6 @@ public abstract class ForgeZRenderPlayer implements ZRenderPlayer {
 	public Player getEntity() {return e.getEntity();}
 
 	public static class Pre extends ForgeZRenderPlayer implements ZRenderPlayer.Pre {
-
 		public Pre(RenderPlayerEvent.Pre e) {
 			super(e);
 		}

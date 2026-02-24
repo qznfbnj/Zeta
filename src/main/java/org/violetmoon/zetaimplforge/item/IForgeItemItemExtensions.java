@@ -1,29 +1,27 @@
 package org.violetmoon.zetaimplforge.item;
 
-import java.util.Map;
-import java.util.function.Consumer;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.violetmoon.zeta.item.ext.IZetaItemExtensions;
-
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.LevelReader;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
+import org.violetmoon.zeta.item.ext.IZetaItemExtensions;
+
+import java.util.function.Consumer;
 
 public class IForgeItemItemExtensions implements IZetaItemExtensions {
+
 	public static final IForgeItemItemExtensions INSTANCE = new IForgeItemItemExtensions();
 
 	@Override
@@ -37,8 +35,8 @@ public class IForgeItemItemExtensions implements IZetaItemExtensions {
 	}
 
 	@Override
-	public boolean onEntityItemUpdateZeta(ItemStack stack, ItemEntity ent) {
-		return stack.onEntityItemUpdate(ent);
+	public boolean onEntityItemUpdateZeta(ItemStack stack, ItemEntity entity) {
+		return stack.onEntityItemUpdate(entity);
 	}
 
 	@Override
@@ -47,8 +45,8 @@ public class IForgeItemItemExtensions implements IZetaItemExtensions {
 	}
 
 	@Override
-	public boolean canEquipZeta(ItemStack stack, EquipmentSlot armorType, Entity ent) {
-		return stack.canEquip(armorType, ent);
+	public boolean canEquipZeta(ItemStack stack, EquipmentSlot armorType, LivingEntity entity) {
+		return stack.canEquip(armorType, entity);
 	}
 
 	@Override
@@ -57,38 +55,23 @@ public class IForgeItemItemExtensions implements IZetaItemExtensions {
 	}
 
 	@Override
-	public @Nullable String getArmorTextureZeta(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-		return stack.getItem().getArmorTexture(stack, entity, slot, type);
-	}
-
-	@Override
-	public int getMaxDamageZeta(ItemStack stack) {
-		return stack.getMaxDamage();
-	}
-
-	@Override
-	public boolean canShearZeta(ItemStack stack) {
-		return stack.canPerformAction(ToolActions.SHEARS_CARVE);
-	}
-
-	@Override
 	public int getEnchantmentValueZeta(ItemStack stack) {
 		return stack.getItem().getEnchantmentValue(stack);
 	}
 
 	@Override
-	public boolean canApplyAtEnchantingTableZeta(ItemStack stack, Enchantment enchantment) {
-		return stack.canApplyAtEnchantingTable(enchantment);
+	public boolean canShearZeta(ItemStack stack) {
+		return stack.canPerformAction(ItemAbilities.SHEARS_CARVE);
 	}
 
 	@Override
-	public int getEnchantmentLevelZeta(ItemStack stack, Enchantment enchantment) {
-		return stack.getEnchantmentLevel(enchantment);
+	public int getEnchantmentLevelZeta(ItemStack stack, Holder<Enchantment> enchantment) {
+		return stack.getItem().getEnchantmentLevel(stack, enchantment);
 	}
 
 	@Override
-	public Map<Enchantment, Integer> getAllEnchantmentsZeta(ItemStack stack) {
-		return stack.getAllEnchantments();
+	public ItemEnchantments getAllEnchantmentsZeta(ItemStack stack, HolderLookup.RegistryLookup<Enchantment> lookup) {
+		return stack.getAllEnchantments(lookup);
 	}
 
 	@Override
@@ -97,12 +80,7 @@ public class IForgeItemItemExtensions implements IZetaItemExtensions {
 	}
 
 	@Override
-	public int getBurnTimeZeta(ItemStack stack, @Nullable RecipeType<?> recipeType) {
-		return ForgeHooks.getBurnTime(stack, recipeType);
-	}
-
-	@Override
-	public <T extends LivingEntity> int damageItemZeta(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
+	public <T extends LivingEntity> int damageItemZeta(ItemStack stack, int amount, T entity, Consumer<Item> onBroken) {
 		return stack.getItem().damageItem(stack, amount, entity, onBroken);
 	}
 
@@ -114,10 +92,5 @@ public class IForgeItemItemExtensions implements IZetaItemExtensions {
 	@Override
 	public boolean canElytraFlyZeta(ItemStack stack, LivingEntity entity) {
 		return stack.canElytraFly(entity);
-	}
-
-	@Override
-	public int getDefaultTooltipHideFlagsZeta(@NotNull ItemStack stack) {
-		return stack.getItem().getDefaultTooltipHideFlags(stack);
 	}
 }

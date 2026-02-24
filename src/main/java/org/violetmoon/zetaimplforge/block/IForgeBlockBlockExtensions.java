@@ -1,8 +1,5 @@
 package org.violetmoon.zetaimplforge.block;
 
-import org.jetbrains.annotations.Nullable;
-import org.violetmoon.zeta.block.ext.IZetaBlockExtensions;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -14,7 +11,10 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.common.ToolAction;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.util.TriState;
+import org.jetbrains.annotations.Nullable;
+import org.violetmoon.zeta.block.ext.IZetaBlockExtensions;
 
 //dumb class name; (IForgeBlock)(BlockExtensions); implementation of IZetaBlockExtensions using methods from IForgeBlock
 public class IForgeBlockBlockExtensions implements IZetaBlockExtensions {
@@ -38,8 +38,8 @@ public class IForgeBlockBlockExtensions implements IZetaBlockExtensions {
 	}
 
 	@Override
-	public boolean canSustainPlantZeta(BlockState state, BlockGetter level, BlockPos pos, Direction facing, String plantabletype) {
-		return false; //TODO thread the IPlantable through
+	public TriState canSustainPlantZeta(BlockState state, BlockGetter level, BlockPos soilPosition, Direction facing, BlockState plant) {
+		return TriState.DEFAULT;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class IForgeBlockBlockExtensions implements IZetaBlockExtensions {
 	}
 
 	@Override
-	public float[] getBeaconColorMultiplierZeta(BlockState state, LevelReader level, BlockPos pos, BlockPos beaconPos) {
+	public Integer getBeaconColorMultiplierZeta(BlockState state, LevelReader level, BlockPos pos, BlockPos beaconPos) {
 		return state.getBeaconColorMultiplier(level, pos, beaconPos);
 	}
 
@@ -97,13 +97,10 @@ public class IForgeBlockBlockExtensions implements IZetaBlockExtensions {
 		return state.shouldDisplayFluidOverlay(level, pos, fluidState);
 	}
 
+
 	@Override
-	public @Nullable BlockState getToolModifiedStateZeta(BlockState state, UseOnContext context, String toolActionType, boolean simulate) {
-		ToolAction action = ToolAction.get(toolActionType);
-		if(action == null)
-			return null;
-		else
-			return state.getToolModifiedState(context, action, simulate);
+	public @Nullable BlockState getToolModifiedStateZeta(BlockState state, UseOnContext context, ItemAbility ability, boolean simulate) {
+		return ability == null ? null : state.getToolModifiedState(context, ability, simulate);
 	}
 
 	@Override

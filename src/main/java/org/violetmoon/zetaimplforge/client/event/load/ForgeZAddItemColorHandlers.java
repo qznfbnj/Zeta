@@ -1,15 +1,16 @@
 package org.violetmoon.zetaimplforge.client.event.load;
 
-import java.util.function.Function;
-
-import org.violetmoon.zeta.Zeta;
-import org.violetmoon.zeta.client.event.load.ZAddItemColorHandlers;
-
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import org.violetmoon.zeta.Zeta;
+import org.violetmoon.zeta.client.event.load.ZAddItemColorHandlers;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class ForgeZAddItemColorHandlers implements ZAddItemColorHandlers {
 	protected final RegisterColorHandlersEvent.Item e;

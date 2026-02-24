@@ -1,18 +1,14 @@
 package org.violetmoon.zetaimplforge.mod;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.common.NeoForge;
 import org.violetmoon.zeta.Zeta;
 import org.violetmoon.zeta.block.IZetaBlock;
-import org.violetmoon.zeta.client.ClientTicker;
 import org.violetmoon.zeta.client.event.load.*;
 import org.violetmoon.zeta.client.event.play.*;
 import org.violetmoon.zeta.event.bus.IZetaLoadEvent;
@@ -30,14 +26,12 @@ import org.violetmoon.zetaimplforge.event.load.ForgeZRegisterClientReloadListene
 import org.violetmoon.zetaimplforge.event.play.ForgeZScreenshot;
 
 public class ZetaModClientProxy extends ZetaModCommonProxy {
-
     @Override
     public void registerEvents(Zeta zeta){
         super.registerEvents(zeta);
-        zeta.playBus.subscribe(ClientTicker.INSTANCE)
-                .subscribe(this);
+        //zeta.playBus.subscribe(ClientTicker.INSTANCE).subscribe(this);
 
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
     }
 
     //TODO: move these 2 events to a common class
@@ -46,7 +40,7 @@ public class ZetaModClientProxy extends ZetaModCommonProxy {
     boolean clientTicked = false;
 
     @SubscribeEvent
-    public void clientTick(TickEvent.ClientTickEvent e) {
+    public void clientTick(ClientTickEvent.Pre e) {
         if (!clientTicked) {
             ZetaList.INSTANCE.fireLoadEvent(new ForgeZFirstClientTick());
             clientTicked = true;
@@ -82,6 +76,7 @@ public class ZetaModClientProxy extends ZetaModCommonProxy {
         r.registerWrapper(ZModel.RegisterAdditional.class, ForgeZModel.RegisterAdditional.class);
         r.registerWrapper(ZModel.BakingCompleted.class, ForgeZModel.BakingCompleted.class);
         r.registerWrapper(ZModel.ModifyBakingResult.class, ForgeZModel.ModifyBakingResult.class);
+        r.registerWrapper(ZRegisterClientExtension.class, ForgeZRegisterClientExtension.class);
         r.registerWrapper(ZRegisterLayerDefinitions.class, ForgeZRegisterLayerDefinitions.class);
         r.registerWrapper(ZTooltipComponents.class, ForgeZTooltipComponents.class);
         r.registerWrapper(ZRegisterClientReloadListener.class, ForgeZRegisterClientReloadListener.class);
@@ -95,9 +90,9 @@ public class ZetaModClientProxy extends ZetaModCommonProxy {
     public void addKnownZetaPlayEvents(ForgeEventsRemapper<IZetaPlayEvent, Event> r) {
         super.addKnownZetaPlayEvents(r);
 
-        r.registerWrapper(ZClientTick.End.class, TickEvent.ClientTickEvent.class,
+        r.registerWrapper(ZClientTick.End.class, ClientTickEvent.Post.class,
                 ForgeZClientTick.End::new, w -> w.e);
-        r.registerWrapper(ZClientTick.Start.class, TickEvent.ClientTickEvent.class,
+        r.registerWrapper(ZClientTick.Start.class, ClientTickEvent.Pre.class,
                 ForgeZClientTick.Start::new, w -> w.e);
         r.registerWrapper(ZGatherTooltipComponents.class, ForgeZGatherTooltipComponents.class);
         r.registerWrapper(ZHighlightBlock.class, ForgeZHighlightBlock.class);
@@ -114,10 +109,6 @@ public class ZetaModClientProxy extends ZetaModCommonProxy {
                 ForgeZRenderPlayer.Post::new, w -> w.e);
         r.registerWrapper(ZRenderPlayer.Pre.class, RenderPlayerEvent.Pre.class,
                 ForgeZRenderPlayer.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderTick.End.class, TickEvent.RenderTickEvent.class,
-                ForgeZRenderTick.End::new, w -> w.e);
-        r.registerWrapper(ZRenderTick.Start.class, TickEvent.RenderTickEvent.class,
-                ForgeZRenderTick.Start::new, w -> w.e);
         r.registerWrapper(ZRenderTooltip.GatherComponents.class, ForgeZRenderTooltip.GatherComponents.class);
         r.registerWrapper(ZRenderTooltip.GatherComponents.Low.class, ForgeZRenderTooltip.GatherComponents.Low.class);
         r.registerWrapper(ZScreen.Opening.class, ForgeZScreen.Opening.class);
@@ -135,34 +126,10 @@ public class ZetaModClientProxy extends ZetaModCommonProxy {
                 ForgeZScreen.Render.Post::new, w -> w.e);
         r.registerWrapper(ZScreen.Render.Pre.class, ScreenEvent.Render.Pre.class,
                 ForgeZScreen.Render.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.ArmorLevel.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.ArmorLevel.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.ArmorLevel.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.ArmorLevel.Post::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.Crosshair.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.Crosshair.Post::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.Crosshair.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.Crosshair.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.DebugText.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.DebugText.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.DebugText.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.DebugText.Post::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.Hotbar.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.Hotbar.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.Hotbar.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.Hotbar.Post::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.PlayerHealth.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.PlayerHealth.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.PlayerHealth.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.PlayerHealth.Post::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.PotionIcons.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.PotionIcons.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.PotionIcons.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.PotionIcons.Post::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.ChatPanel.Pre.class, RenderGuiOverlayEvent.Pre.class,
-                ForgeZRenderGuiOverlay.ChatPanel.Pre::new, w -> w.e);
-        r.registerWrapper(ZRenderGuiOverlay.ChatPanel.Post.class, RenderGuiOverlayEvent.Post.class,
-                ForgeZRenderGuiOverlay.ChatPanel.Post::new, w -> w.e);
+        r.registerWrapper(ZRenderGuiOverlay.Pre.class, RenderGuiLayerEvent.Pre.class,
+                ForgeZRenderGuiOverlay.Pre::new, w -> w.e);
+        r.registerWrapper(ZRenderGuiOverlay.Post.class, RenderGuiLayerEvent.Post.class,
+                ForgeZRenderGuiOverlay.Post::new, w -> w.e);
         // zeta own event
         r.registerWrapper(ZScreenshot.class, ForgeZScreenshot.class);
         r.registerWrapper(ZEarlyRender.class, ForgeZEarlyRender.class);
